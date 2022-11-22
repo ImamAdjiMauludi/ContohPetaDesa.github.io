@@ -116,12 +116,11 @@ html, body, #map {
 		var map = L.map('map', {
 		center: [-6.618730, 106.991914],
 		zoom: 12,
-		layers: [osm,googleStreets]
+		layers: [osm]
 		});
 
 		var baseMaps = {
-		'OSM': osm,
-		'Gmaps' : googleStreets
+		'OSM': osm
 		};
 
 	var layerControl = L.control.layers(baseMaps).addTo(map);
