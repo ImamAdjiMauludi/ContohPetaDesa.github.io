@@ -11,13 +11,19 @@
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
 
-    <link rel="stylesheet" href="css/leaflet.extra-markers.min.css"> ///1
+    <link rel="stylesheet" href="css/leaflet.extra-markers.min.css">
 
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
 
-    <script src="js/leaflet.extra-markers.min.js"></script>///2
+    <script src="js/leaflet.extra-markers.min.js"></script>
 
-     <script defer src="https://use.fontawesome.com/releases/v5.12.0/js/all.js"></script>///3
+    <script defer src="https://use.fontawesome.com/releases/v6.2.1/js/all.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.css" />
+	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.79.0/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+
+	<link rel="stylesheet" href="./css/leaflet.legend.css" />
+    <script type="text/javascript" src="./css/leaflet.legend.js"></script>
 
 
 <style>
@@ -32,6 +38,65 @@ html, body, #map {
 			max-width: 100%;
 			max-height: 100%;
 		}
+		.legend {
+		  padding: 6px 8px;
+		  font: 14px Arial, Helvetica, sans-serif;
+		  background: white;
+		  background: rgba(255, 255, 255, 0.8);
+		  /*box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);*/
+		  /*border-radius: 5px;*/
+		  line-height: 24px;
+		  color: #555;
+		}
+		.legend h4 {
+		  text-align: center;
+		  font-size: 16px;
+		  margin: 2px 12px 8px;
+		  color: #777;
+		}
+
+		.legend span {
+		  position: relative;
+		  bottom: 3px;
+		}
+
+		.legend i {
+		  width: 18px;
+		  height: 18px;
+		  float: left;
+		  margin: 0 8px 0 0;
+		  opacity: 0.7;
+		}
+
+		.legend i.icon {
+		  background-size: 18px;
+		  background-color: rgba(255, 255, 255, 1);
+		}
+
+		.button-10 {
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  padding: 6px 14px;
+		  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+		  border-radius: 6px;
+		  border: none;
+
+		  color: #fff;
+		  background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+		   background-origin: border-box;
+		  box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+		  user-select: none;
+		  -webkit-user-select: none;
+		  touch-action: manipulation;
+		}
+
+		.button-10:focus {
+		  box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
+		  outline: 0;
+		}
+		
+
 </style>
 </head>
  
@@ -39,16 +104,29 @@ html, body, #map {
 	<div id="map"></div>
 
 <script>
+
 	///	OSM
 		var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'})
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
 
 	/// Gmaps
 		var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
     	maxZoom: 20,
     	subdomains:['mt0','mt1','mt2','mt3']
  		});
+
+ 	/// empty
+		var empty = L.tileLayer('');
+
+ 	/// Legends
+		var items = {
+			"Ikon Sekolah SD" : SDN04,
+			"Rawa Gede" : RawaGede,
+
+		};
+
+///----------------------IKON PETA-------------///
 
 	/// Ikon
 		  // Tempat Wisata
@@ -58,14 +136,37 @@ html, body, #map {
 		    shape: 'square',
 		    prefix: 'fa'
 		  });
- 		
- 		// Sekolah
- 		var IkonSekolah = L.ExtraMarkers.icon({
-		    icon: 'fa-solid fa-school',
-		    markerColor: 'blue',
-		    shape: 'square',
-		    prefix: 'fa'
+ 		///// RAWA GEDE 
+		  var IconRawaGede = L.icon({
+		    iconUrl: './landmark/RW 05/Wisata/IconRawaGede.png',
+		    className: 'Rawagedeimage-icon',
+		    iconSize: [130, 78],
+		    iconAnchor: [50, 50],
+		    popupAnchor: [0, -40],
 		  });
+ 		// Sekolah
+		  //TK
+		  var IkonSekolahTK = L.ExtraMarkers.icon({
+			    icon: 'fa-solid fa-school',
+			    markerColor: 'yellow',
+			    shape: 'square',
+			    prefix: 'fa'
+			  });
+		  //SD
+	 		var IkonSekolahSD = L.ExtraMarkers.icon({
+			    icon: 'fa-solid fa-school',
+			    markerColor: 'red',
+			    shape: 'square',
+			    prefix: 'fa'
+			  });
+	 		//SMP
+	 		var IkonSekolahSMP = L.ExtraMarkers.icon({
+			    icon: 'fa-solid fa-school',
+			    markerColor: 'blue',
+			    shape: 'square',
+			    prefix: 'fa'
+			  });
+	 		//SMA
 
  		// Pemerintahan
  		var IkonPemerintahan = L.ExtraMarkers.icon({
@@ -85,43 +186,254 @@ html, body, #map {
 
 		// UMKM
 		var IkonUMKM = L.ExtraMarkers.icon({
-			icon: 'fa-solid fa-landmark',
-			markerColor: 'red',
+			icon: 'fas fa-store',
+			markerColor: 'purple',
 			shape: 'square',
 			prefix: 'fa'
 			});
 
-	/// Variable titik
-		///sekolah
-		var SDN02 = L.marker([-6.5957806185841745, 107.02160452135395],{icon: IkonSekolah, title: 'SDN 02 Sirnajaya'}).bindPopup('<h1>SDN 02 Sirnajaya</h1><p>Ini sekolah</p>');
-		var SDN03 = L.marker([-6.607574207434945, 107.0017429054419],{icon: IkonSekolah, title: 'SDN 03 Sirnajaya'}).bindPopup('<h1>SDN 03 Sirnajaya</h1><p>Ini sekolah</p>');
-		var MIHidayatul = L.marker([-6.598728019939144, 107.0153254214311],{icon: IkonSekolah, title: 'MI Hidayatul Falah'}).bindPopup('<h1>MI Hidayatul Falah</h1><p>Ini sekolah, nanti bisa ditambah kontak dll, fotonya cuman contoh y</ p><img src="./foto sekolah.JPG" width="300" height="200">');
+		var IkonBengkel = L.ExtraMarkers.icon({
+			icon: 'fa-solid fa-wrench',
+			markerColor: 'purple',
+			shape: 'square',
+			prefix: 'fa'
+			});
 
-		///Grup
-		var sekolah = L.layerGroup([SDN02, SDN03, MIHidayatul]);
+		// Masjid
+		var IkonMasjid = L.ExtraMarkers.icon({
+			icon: 'fa-solid fa-star-and-crescent',
+			markerColor: 'green',
+			shape: 'square',
+			prefix: 'fa'
+			});
+
+		// Kesehatan
+		///Posyandu
+		var IkonPosyandu = L.ExtraMarkers.icon({
+			    icon: 'fa-solid fa-person-breastfeeding',
+			    markerColor: 'blue',
+			    shape: 'square',
+			    prefix: 'fa'
+			  });
+
+		///Bidan
+		var IkonBidan = L.ExtraMarkers.icon({
+			    icon: 'fa-solid fa-person-pregnant',
+			    markerColor: 'blue',
+			    shape: 'square',
+			    prefix: 'fa'
+			  });
+
+		///Dokter
+		var IkonDokter = L.ExtraMarkers.icon({
+			    icon: 'fa-solid fa-suitcase-medical',
+			    markerColor: 'blue',
+			    shape: 'square',
+			    prefix: 'fa'
+			  });
+
+///------------TITIK PETA---------------///
+
+	/// Variable titik
+	//---------------RW 01
+		//Paud/TK
+		var PaudMerpati= L.marker([-6.594971,107.022897],{icon: IkonSekolahTK, title: 'PAUD MERPATI'}).bindPopup('<h1>PAUD MERPATI</h1><form action="https://www.google.co.id/maps/dir//-6.594971,107.022897" method="get" target="_blank"><button type="submit" class="button-10">Pergi ke lokasi</button></form>');
+		var PaudCeria= L.marker([-6.593434,107.017179],{icon: IkonSekolahTK, title: 'PAUD CERIA'}).bindPopup('<h1>PAUD CERIA</h1><form action="https://www.google.co.id/maps/dir//-6.593434,107.017179" method="get" target="_blank"><button type="submit" class="button-10">Pergi ke lokasi</button></form>');
+		var TKAlhambra= L.marker([-6.595269,107.022024],{icon: IkonSekolahTK, title: 'TK ALHAMBRA'}).bindPopup('<h1>TK ALHAMBRA</h1><form action="https://www.google.co.id/maps/dir//-6.595269,107.022024" method="get" target="_blank"><button type="submit" class="button-10">Pergi ke lokasi</button></form>');
+
+		//SD/MI
+		var SDN02 = L.marker([-6.5957806185841745, 107.02160452135395],{icon: IkonSekolahSD, title: 'SDN 02 Sirnajaya'}).bindPopup('<h1>SDN 02 Sirnajaya</h1><embed type="text/html" src="./landmark/RW 01/Sekolah/SD-MI/SDN02.html"  width="300" height="200">');
+		var SDN03 = L.marker([-6.607574207434945, 107.0017429054419],{icon: IkonSekolahSD, title: 'SDN 03 Sirnajaya'}).bindPopup('<h1>SDN 03 Sirnajaya</h1>');
+		var MIHidayatul = L.marker([-6.598728019939144, 107.0153254214311],{icon: IkonSekolahSD, title: 'MI Hidayatul Falah'}).bindPopup('<h1>MI Hidayatul Falah</h1>');
+		var MISTegallega = L.marker([-6.598367,107.015307],{icon: IkonSekolahSD, title: 'MIS TEGALLEGA'}).bindPopup('<h1>MIS TEGALLEGA</h1><embed type="text/html" src="./landmark/RW 01/Sekolah/SD-MI/MI Tegal Lega.html"  width="300" height="200">');
+		var MISHidayatulIslamiyah = L.marker([-6.593434,107.017179],{icon: IkonSekolahSD, title: 'MIS HIDAYATUL ISLAMIYAH'}).bindPopup('<h1>MIS HIDAYATUL ISLAMIYAH</h1><embed type="text/html" src="./landmark/RW 01/Sekolah/SD-MI/HidayatulIslamiyah.html"  width="300" height="200">');
+
+		//Pondok
+		var PondokHuda = L.marker([-6.598119,107.016976],{icon: IkonSekolahSD, title: 'YAYASAN PENDIDIKAN ISLAM SOLALATUL HUDA'}).bindPopup('<h1>YAYASAN PENDIDIKAN ISLAM SOLALATUL HUDA</h1><embed type="text/html" src="./landmark/RW 01/Sekolah/Pasantren-Pondok/SolalatulHuda.html"  width="300" height="200">');
+
+		//UMKM
+		var WarungBambu = L.marker([-6.593748,107.023363],{icon: IkonUMKM, title: 'Warung Bambu'}).bindPopup('<h1>Warung Bambu</h1>');
+		var WarungKuliner = L.marker([-6.594709,107.023440],{icon: IkonUMKM, title: 'Warung Kuliner'}).bindPopup('<h1>Warung Kuliner</h1>');
+		var Sangjaya = L.marker([-6.594586,107.024071],{icon: IkonSekolahSD, title: 'Keripik Pisang Sangjaya'}).bindPopup('<h1>Keripik Pisang Sangjaya</h1>');
+		
+
+		//Masjid
+		var MasjidTegalega = L.marker([-6.597114,107.017295],{icon: IkonMasjid, title: 'Masjid Jami Almujahidin Tegallega'}).bindPopup('<h1>Masjid Jami Almujahidin Tegallega</h1>');
+		var MasjidIbrohimah = L.marker([-6.595094,107.021497],{icon: IkonMasjid, title: 'Masjid Al Ibrohimiah'}).bindPopup('<h1>Masjid Al Ibrohimiah</h1>');
+		var MasjidHuda = L.marker([-6.598072,107.016878],{icon: IkonMasjid, title: 'Masjid Amirul Huda'}).bindPopup('<h1>Masjid Amirul Huda</h1>');
+
+		//Posyandu
+		var PosyanduRW1 = L.marker([-6.595168,107.022809],{icon: IkonPosyandu, title: 'Posyandu RW 1'}).bindPopup('<h1>Posyandu RW 1</h1>');
+
+		//---------------RW 02
+		// UMKM
+		var WarungSembako = L.marker([-6.601070,107.015314],{icon: IkonUMKM, title: 'WARUNG SEMBAKO'}).bindPopup('<h1>WARUNG SEMBAKO</h1>');
+
+		var WarungMamaRaffa = L.marker([-6.600669,107.016772],{icon: IkonUMKM, title: 'WARUNG MAMA RAFFA'}).bindPopup('<h1>WARUNG MAMA RAFFA</h1>');
+
+		var TokoPerabotan = L.marker([-6.601152,107.015237],{icon: IkonUMKM, title: 'TOKO PERABOTAN'}).bindPopup('<h1>TOKO PERABOTAN</h1>');
+
+		var WarungSayur = L.marker([-6.600282,107.015523],{icon: IkonUMKM, title: 'WARUNG SAYUR'}).bindPopup('<h1>WARUNG SAYUR</h1>');
+
+		var BengkelIDIM = L.marker([-6.601292,107.015406],{icon: IkonBengkel, title: 'BENGKEL IDIM'}).bindPopup('<h1>BENGKEL IDIM</h1>');
+
+		// Posyandu/Bidan
+
+		var BidanIda = L.marker([-6.600759,107.016056],{icon: IkonBidan, title: 'BIDAN IDA'}).bindPopup('<h1>BIDAN IDA</h1>');
+
+		var PosyanduRW2 = L.marker([-6.601237,107.014850],{icon: IkonPosyandu, title: 'POSYANDU RW 2'}).bindPopup('<h1>POSYANDU RW 2</h1>');
+
+		var MasjidRW2 = L.marker([-6.601490,107.016736],{icon: IkonMasjid, title: 'MASJID RW 2'}).bindPopup('<h1>MASJID RW 2</h1>');
+
+
 
 		///Pemerintahan
-		var KantorDesa = L.marker([-6.594993400817185, 107.02282923578586],{icon:IkonPemerintahan}).bindPopup('<h1>Kantor Desa</h1><embed type="text/html" src="./landmark/kantor desa.html"  width="300" height="200"><div style="width:300px;height:200px;overflow:auto;"><p align="justify">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit es se cillum dolore eu fugiat nulla pariatur.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p></div>');
-		///Grup
-		var pemerintahan = L.layerGroup([KantorDesa]);
+		var KantorDesa = L.marker([-6.594993400817185, 107.02282923578586],{icon:IkonPemerintahan}).bindPopup('<h1>Kantor Desa</h1><embed type="text/html" src="./landmark/kantor desa.html"  width="300" height="200"><div style="width:300px;height:200px;overflow:auto;"><p align="justify">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p><p><a href="https://www.google.co.id/maps/dir//-6.5949934,107.0228292/@-6.5950928,106.9529614,12z" target="_blank">Petunjuk Arah</a></p></div> ');
 
+
+		//---------------RW 03
+		//- UMKM
+		var AgenWarungBiru = L.marker([-6.6073248, 107.0023369],{icon: IkonUMKM, title: 'AGEN WARUNG SEMBAKO "BIRU"'}).bindPopup('<h1>AGEN WARUNG SEMBAKO "BIRU"</h1><embed type="text/html" src="./landmark/RW 03/UMKM/AgenBiru.html"  width="300" height="200">');
+		var WarungTokoNovi = L.marker([-6.6018910, 107.0136169],{icon: IkonUMKM, title: 'AGEN WARUNG SEMBAKO "BIRU"'}).bindPopup('<h1>WARUNG Toko Novi</h1><embed type="text/html" src="./landmark/RW 03/UMKM/TokoNovi.html"  width="300" height="200">');
+		
+
+		//- Sekolah
+		var SDN03 = L.marker([-6.6080186604578754, 107.00170436580179],{icon: IkonSekolahSD, title: 'SDN 03 Sirnajaya'}).bindPopup('<h1>SDN 03 Sirnajaya</h1><embed type="text/html" src="./landmark/RW 03/Sekolah/SDN03.html"  width="300" height="200">');
+		var PaudAlmuizz = L.marker([-6.6063469, 107.0059297],{icon: IkonSekolahTK, title: 'PAUD Al-Muiz'}).bindPopup('<h1>PAUD AL-Muizz</h1><embed type="text/html" src="./landmark/RW 03/Sekolah/ALMuiz.html"  width="300" height="200">');
+		var PaudQU = L.marker([-6.6063469, 107.0059297],{icon: IkonSekolahTK, title: 'PAUDQU Subulussalam'}).bindPopup('<h1>PAUDQU Subulussalam</h1><embed type="text/html" src="./landmark/RW 03/Sekolah/Subulussalam.html"  width="300" height="200">');
+
+		//- Masjid
+		var MasjidSubulussalam = L.marker([-6.608200,107.002000],{icon: IkonMasjid, title: 'Masjid Subulussalam'}).bindPopup('<h1>Masjid Subulussalam</h1><embed type="text/html" src="./landmark/RW 03/Masjid/Subulussalam.html"  width="300" height="200">');
+		var MasjidALBarokah = L.marker([-6.6071398468134666, 107.003660996502],{icon: IkonMasjid, title: 'Masjid Jami Al-Barokah'}).bindPopup('<h1>Masjid Jami Al-Barokah</h1><embed type="text/html" src="./landmark/RW 03/Masjid/AlBarokah.html"  width="300" height="200">');
+
+
+		//- Posyandu
+		var PosyanduKakatua = L.marker([-6.607742, 107.001188],{icon: IkonPosyandu, title: 'Posyandu Kaka Tua'}).bindPopup('<h1>Posyandu Kaka Tua</h1><embed type="text/html" src="./landmark/RW 03/Posyandu/Kakatua.html"  width="300" height="200">');
+
+		//---------------RW 04
+
+		///- SEKOLAH
+
+		var PaudKBAlAhmar = L.marker([-6.607312,107.010961],{icon: IkonSekolahTK, title: 'PAUD KB AL AHMAR'}).bindPopup('<h1>PAUD KB AL AHMAR</h1><embed type="text/html" src="./landmark/RW 04/Sekolah/PAUDKBALAhmar.html"  width="300" height="200">');
+
+		var MINurulAhmar = L.marker([-6.606619,107.012056],{icon: IkonSekolahSD, title: 'MI NURUL AHMAR'}).bindPopup('<h1>MI NURUL AHMAR</h1><embed type="text/html" src="./landmark/RW 04/Sekolah/MINurulAhmar.html"  width="300" height="200">');
+
+		var MtsNurulAhmarAsySyipad = L.marker([-6.607428,107.011165],{icon: IkonSekolahSMP, title: 'MTS NURUL AHMAR ASY SYIPAD'}).bindPopup('<h1>MTS NURUL AHMAR ASY SYIPAD</h1><embed type="text/html" src="./landmark/RW 04/Sekolah/MTsNurulAhmarAsySyipad.html"  width="300" height="200">');
+
+		///- UMKM
+
+		var PemotonganAyamMangSahrul = L.marker([-6.608628,107.010095],{icon: IkonUMKM, title: 'PEMOTONGAN AYAM MANG SAHRUL'}).bindPopup('<h1>PEMOTONGAN AYAM MANG SAHRUL</h1><embed type="text/html" src="./landmark/RW 04/UMKM/PemotonganAyamMangSahrul.html"  width="300" height="200">');
+
+		var PenggilinganPadiPakKarsan = L.marker([-6.608373,107.010099],{icon: IkonUMKM, title: 'PENGGILINGAN PADI PAK KARSAN'}).bindPopup('<h1>PENGGILINGAN PADI PAK KARSAN</h1><embed type="text/html" src="./landmark/RW 04/UMKM/PenggilinganPadiPakKarsan.html"  width="300" height="200">');
+
+		var PengobatanAlternatifKHAnshori = L.marker([-6.606819,107.011543],{icon: IkonDokter, title: 'PENGOBATAN ALTERNATIF K.H. ANSHORI'}).bindPopup('<h1>PENGOBATAN ALTERNATIF K.H. ANSHORI</h1><embed type="text/html" src="./landmark/RW 04/UMKM/PengobatanAlternatif.html"  width="300" height="200">');
+
+		var AgenWarungSembakoPakYeyep = L.marker([-6.608070,107.009454],{icon: IkonUMKM, title: 'AGEN WARUNG SEMBAKO PAK YEYEP'}).bindPopup('<h1>AGEN WARUNG SEMBAKO PAK YEYEP</h1><embed type="text/html" src="./landmark/RW 04/UMKM/AgenWarungSembakoPakYeyep.html"  width="300" height="200">');
+
+		///- Masjid
+		var MasjidJamiAlAmanah = L.marker([-6.608675,107.010964],{icon: IkonMasjid, title: 'MASJID JAMI AL AMANAH'}).bindPopup('<h1>MASJID JAMI AL AMANAH</h1><embed type="text/html" src="./landmark/RW 04/Fasilitas Umum/MasjidAlAmanah.html"  width="300" height="200">');
+
+
+		//---------------RW 05
+
+		///- SEKOLAH
+
+		var PaudAlInayah = L.marker([-6.623550,107.002543],{icon: IkonSekolahTK, title: 'Paud Al Inayah'}).bindPopup('<h1>Paud Al Inayah</h1>');
+ 
+		var PaudAlQomariyah = L.marker([-6.627082,106.991543],{icon: IkonSekolahTK, title: 'Paud Al Q omariyah'}).bindPopup('<h1>Paud Al Qomariyah</h1>');
+
+		var MISDarulFalah = L.marker([-6.624144,107.001595],{icon: IkonSekolahSD, title: 'MIS Darul Falah'}).bindPopup('<h1>MIS Darul Falah</h1>');
+
+		var MTsAlInayah = L.marker([-6.623762,107.002487],{icon: IkonSekolahSD, title: 'MTs Al Inayah'}).bindPopup('<h1>MTs Al Inayah</h1>');
+
+		///- Yayasan
+		var YayasanTahfidzAlQuran = L.marker([-6.625743,106.999985],{icon: IkonSekolahSD, title: 'Yayasan Tahfidz Al Quran'}).bindPopup('<h1>Yayasan Tahfidz Al Quran</h1>');
+
+		///- UMKM
+		var BengkelMTR = L.marker([-6.625447,106.997696],{icon: IkonBengkel, title: 'Bengkel MTR'}).bindPopup('<h1>Bengkel MTR</h1>');
+
+		var BengkelTzlMM = L.marker([-6.625651,106.998908],{icon: IkonBengkel, title: 'Bengkel Tzl M M'}).bindPopup('<h1>Bengkel Tzl M M</h1>');
+
+		var Laundry05 = L.marker([-6.625466,106.997340],{icon: IkonSekolahSD, title: 'Laundry'}).bindPopup('<h1>Laundry</h1>');
+
+		var WarungSeblak = L.marker([-6.625547,106.998960],{icon: IkonSekolahSD, title: 'Warung Seblak'}).bindPopup('<h1>Warung Seblak</h1>');
+
+		var WarungBuah = L.marker([-6.626844,106.993584],{icon: IkonSekolahSD, title: 'Warung Buah'}).bindPopup('<h1>Warung Buah</h1>');
+
+		///- Masjid
+		var Masjid05 = L.marker([-6.623983,107.001778],{icon: IkonSekolahSD, title: 'Masjid'}).bindPopup('<h1>Masjid</h1>');
+
+		///- Posyandu
+		var PosyanduCendrawasih = L.marker([-6.626222,107.000784],{icon: IkonPosyandu, title: 'Posyandu Cendrawasih'}).bindPopup('<h1>Posyandu Cendrawasih</h1>');
+
+		
 		///Wisata
-		var RawaGede = L.marker([-6.628181522335603, 106.99264705174474],{icon:redMarker}).bindPopup('rawa gede');
+		var RawaGede = L.marker([-6.628181522335603, 106.99264705174474],{icon:IconRawaGede}).bindPopup('<h1>Rawa Gede</h1><embed type="text/html" src="./landmark/RW 05/Wisata/rawagede.html"  width="300" height="200"><p align="justify">Situ Rawa Gede atau Situ Rawa Gede Jonggol adalah sebuah danau (Sd., situ atau setu berarti telaga, gede berarti besar) yang terletak di desa Sirnajaya, Kecamatan Sukamakmur, Jonggol, Kabupaten Bogor. Situ Rawa Gede memiliki luas sekitar 4,6 hektar dan terletak berada di ketinggian + 1072 m dpl ini menjadi tempat wisata yang cukup eksotis di wilayah Bogor Timur.</p><form action="https://www.google.co.id/maps/dir//-6.628181522335603,106.99264705174474" method="get" target="_blank"><button type="submit" class="button-10">Pergi ke lokasi</button></form>');
+
 		var CurugCidulang = L.marker([-6.631960791096603, 106.99000164972476],{icon:IkonWisata}).bindPopup('Curug Cidulang')
+
+
+		//---------------RW 06
+
+		///- Sekolah
+		var PAUDDarulJannah = L.marker([-6.618650,107.009545],{icon: IkonSekolahTK, title: 'PAUD DARUL JANNAH'}).bindPopup('<h1>PAUD DARUL JANNAH</h1>');
+
+		var SDN04 = L.marker([-6.623220,107.005462],{icon: IkonSekolahSD, title: 'SDN 04 SIRNAJAYA'}).bindPopup('<h1>SDN 04 SIRNAJAYA</h1>');
+
+		
+		///- UMKM
+		var WarungAnwar = L.marker([-6.621736,107.012813],{icon: IkonUMKM, title: 'WARUNG ANWAR'}).bindPopup('<h1>WARUNG ANWAR</h1>');
+
+		var WarungKuning = L.marker([-6.619066,107.009029],{icon: IkonUMKM, title: 'WARUNG KUNING'}).bindPopup('<h1>WARUNG KUNING</h1>');
+
+		var WarungBuSumiyati = L.marker([-6.622872,107.005568],{icon: IkonUMKM, title: 'WARUNG BU SUMIYATI'}).bindPopup('<h1>WARUNG BU SUMIYATI</h1>');
+
+		
+		///- Masjid
+		var MasjidJamiAlMutaqim = L.marker([-6.619462,107.008530],{icon: IkonMasjid, title: 'MASJID JAMI AL MUTAQIM'}).bindPopup('<h1>MASJID JAMI AL MUTAQIM</h1>');
+
+		var MasjidRW61 = L.marker([-6.618584,107.009791],{icon: IkonMasjid, title: 'MASJID'}).bindPopup('<h1>MASJID</h1>');
+
+		var MasjidRW62 = L.marker([-6.619087,107.007107],{icon: IkonMasjid, title: 'MASJID'}).bindPopup('<h1>MASJID</h1>');
+
+		var MasjidRW63 = L.marker([-6.622618,107.005970],{icon: IkonMasjid, title: 'MASJID'}).bindPopup('<h1>MASJID</h1>');
+				
+		///- Posyandu
+		var PosyanduDadali = L.marker([-6.619546,107.009106],{icon: IkonPosyandu, title: 'POSYANDU DADALI'}).bindPopup('<h1>POSYANDU DADALI</h1>');
+
+
 
 		///Grup
 		var wisata = L.layerGroup([RawaGede,CurugCidulang]);
+		var pemerintahan = L.layerGroup([KantorDesa]);
+		///Grup
+		var sekolah = L.layerGroup([SDN02, SDN03, MIHidayatul, PaudMerpati, PaudCeria, TKAlhambra, MISTegallega,MISHidayatulIslamiyah, PondokHuda, PaudKBAlAhmar, MINurulAhmar, MtsNurulAhmarAsySyipad, PaudAlInayah, PaudAlQomariyah, MISDarulFalah, MTsAlInayah, YayasanTahfidzAlQuran, PAUDDarulJannah, SDN04, PaudAlmuizz, SDN03, PaudQU]);
 
-	/// Kontrol Layer
+		var masjid = L.layerGroup([MasjidIbrohimah,MasjidTegalega, MasjidHuda, MasjidJamiAlAmanah, MasjidRW61, MasjidRW62, MasjidRW63, MasjidJamiAlMutaqim, MasjidALBarokah, MasjidSubulussalam]);
+		
+		var UMKM = L.layerGroup([WarungBambu, WarungKuliner, WarungSembako, WarungMamaRaffa, TokoPerabotan, WarungSayur, BengkelIDIM, PemotonganAyamMangSahrul, PenggilinganPadiPakKarsan, PengobatanAlternatifKHAnshori, AgenWarungSembakoPakYeyep, BengkelMTR, BengkelTzlMM, Laundry05, WarungSeblak, WarungBuah, WarungAnwar, WarungKuning, WarungBuSumiyati, AgenWarungBiru, WarungTokoNovi]);
+		
+		var posyandu = L.layerGroup([PosyanduRW1, PosyanduRW2, PosyanduCendrawasih, PosyanduDadali, PosyanduKakatua]);
+
+		var bidan = L.layerGroup([BidanIda]);
+
+		var kesehatan = L.layerGroup([PengobatanAlternatifKHAnshori]);
+
+
+/// ---------------------Kontrol Layer------------------------///
+		
 		var map = L.map('map', {
 		center: [-6.618730, 106.991914],
-		zoom: 12,
-		layers: [osm]
+		zoom: 13,
+		layers: [osm, sekolah, pemerintahan, wisata, masjid, UMKM, posyandu, bidan, kesehatan]
 		});
 
 		var baseMaps = {
 		'OSM': osm
+		///'empty' : empty
+		///'Gmaps' : googleStreets
 		};
+
 
 	var layerControl = L.control.layers(baseMaps).addTo(map);
 
@@ -129,6 +441,67 @@ html, body, #map {
 	layerControl.addOverlay(sekolah, 'Sekolah');
 	layerControl.addOverlay(pemerintahan, 'Pemerintahan');
 	layerControl.addOverlay(wisata, 'Wisata');
+	layerControl.addOverlay(masjid, 'Masjid');
+	layerControl.addOverlay(UMKM, 'UMKM');
+	layerControl.addOverlay(posyandu, 'Posyandu');
+	layerControl.addOverlay(bidan, 'Bidan');
+	layerControl.addOverlay(kesehatan, 'Pengobatan Alternatif')
+
+	L.control.locate().addTo(map);
+
+	var legend = L.control.Legend({
+            position: "bottomleft",
+            collapsed: false,
+            symbolWidth: 24,
+            opacity: 1,
+            column: 2,
+            legends: [{
+                label: "Sekolah Dasar",
+                type: "image",
+                url: "./LogoLegends/SD.png",
+            }, {
+                label: "Sekolah Menengah Pertama",
+                type: "image",
+                url: "./LogoLegends/SMP.png"
+            }, {
+                label: "TK/PAUD",
+                type: "image",
+                url: "./LogoLegends/TK.png"
+            }, {
+                label: "Pengobatan Alternatif",
+                type: "image",
+                url: "./LogoLegends/Alternatif.png"
+            }, {
+                label: "Bengkel Motor",
+                type: "image",
+                url: "./LogoLegends/Bengkel.png"
+            }, {
+                label: "Bidan",
+                type: "image",
+                url: "./LogoLegends/Bidan.png"
+            }, {
+                label: "Kantor Desa",
+                type: "image",
+                url: "./LogoLegends/KantorDesa.png"
+            }, {
+                label: "Masjid",
+                type: "image",
+                url: "./LogoLegends/Masjid.png"
+            }, {
+                label: "Posyandu",
+                type: "image",
+                url: "./LogoLegends/Posyandu.png"
+            }, {
+                label: "Warung",
+                type: "image",
+                url: "./LogoLegends/Warung.png"
+            }, {
+                label: "Wisata",
+                type: "image",
+                url: "./LogoLegends/Wisata.png"
+                }]
+        })
+        .addTo(map);
 
 </script>
 </body>
